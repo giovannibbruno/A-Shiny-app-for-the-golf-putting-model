@@ -7,6 +7,8 @@
 
 ## Model Comparison
 
+## Generate Data
+
 ## Collect Data
 JavaScript application using p5js (https://p5js.org) to collect golf putting data.  
 
