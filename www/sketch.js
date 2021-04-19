@@ -58,6 +58,12 @@ function setup() {
 }
 
 function draw() {
+
+
+
+
+
+
   background("green");
     // hole
   stroke(0);
@@ -232,10 +238,12 @@ class Ball {
   reset(){
     this.x = width/2;
     this.y = height - ball_y_start;
+    Shiny.setInputValue("xMouse", "new");
     
   }
 
   move(direction, speed) {
+    this.direction = direction;
     this.y -= speed;
     this.x += speed * tan(-direction);
   }
@@ -245,6 +253,9 @@ class Ball {
     if(this.y < hole_y+radius/2 && this.y > hole_y-radius &&
        this.x > width/2 - radius && this.x < width/2 + radius){
       console.log("goal");
+      // test: send data to shiny
+      Shiny.setInputValue("xMouse", [direction, hole_y]);
+
       return(true);
       
        } else {
@@ -261,6 +272,7 @@ class Ball {
        this.x < width){
       return(true)
     } else{
+      Shiny.setInputValue("xMouse", "miss");
       return(false)
     }
     

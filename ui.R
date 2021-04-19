@@ -16,8 +16,12 @@ ui <- fluidPage(
     sidebarPanel(
 
       # Choose Data
-
+      uiOutput("load_data"),
+      checkboxInput("combine_data", "Combine datasets"),
+      uiOutput("tab_dependent_UI")
+      
       # Model Estimation (ML, Bayes, OLS)
+
 
       # Input: Slider for the number of observations to generate ----
 
@@ -27,7 +31,7 @@ ui <- fluidPage(
     mainPanel(
 
       # tabs
-      tabsetPanel(type = "tabs",
+      tabsetPanel(type = "tabs", id = "current_tab", 
         tabPanel("Plot", plotOutput("model_plot")),
         tabPanel("Parameter Estimation", verbatimTextOutput("parameter_estimation")),
         tabPanel("Model comparison", verbatimTextOutput("model_comparison")),
