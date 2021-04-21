@@ -9,8 +9,11 @@
 
 ## Generate Data
 
+
 ## Collect Data
-JavaScript application using p5js (https://p5js.org) to collect golf putting data.  
+JavaScript application using p5js (https://p5js.org) to collect golf putting data.
+Data is send directly from js to R via Shiny.setInputValue("foo", "bar")
+ 
 
 
 ---
