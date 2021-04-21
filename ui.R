@@ -7,7 +7,7 @@ ui <- fluidPage(
 
 
   # title
-  titlePanel("Tabsets"),
+  titlePanel("Golf putting model"),
 
   # sidebar layout
   sidebarLayout(
