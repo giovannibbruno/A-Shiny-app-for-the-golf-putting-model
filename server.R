@@ -2,7 +2,7 @@
 library(ggplot2)
 
 # some useful functions 
-## Gelman golf model -> probability of hit depending of ft from hole (distance) and
+## Gelman golf model -> probability of hit depending on ft from hole (distance) and
 ## sigma (standard deviation of angle distribution [N(0, sigma^2)])
 ggm <- function(ft, sigma){
   r <- 1.68/2 * 1/12                     # radius of ball (inch -> feet)
@@ -16,7 +16,7 @@ nll <- function(sigma, ft, tries, hits)
               log = TRUE))
 
 
-server2 <- function(input, output) {
+server <- function(input, output) {
   
   # tab dependent UI
   ## renders a different user interface in each tab
@@ -70,15 +70,10 @@ server2 <- function(input, output) {
   
   get_data <- reactive({
     req(input$input_files)
-    if(length(input$input_files) > 0){
       temp <- do.call(rbind.data.frame, lapply(paste0("./data/", input$input_files), 
                                                read.table, header = T))
       if(input$combine_data) temp$ident <- "one_set"
       temp
-    }else {
-      showNotification("Please choose at least one dataset.", type = "warning")
-    }
-    
   })
   
   # plot [tab: Plot]
@@ -111,14 +106,7 @@ server2 <- function(input, output) {
         theme_light() +
         labs(col = "Dataset")
     }
-    
-    
-    
-    
-    
-    ###### ggplot based on dat [see above: dat <- get_data()]
-    
-    
+      
     
     
   })
