@@ -17,7 +17,10 @@ ui <- fluidPage(
 
       # Choose Data
       uiOutput("load_data"),
-      checkboxInput("combine_data", "Combine datasets"),
+      conditionalPanel(
+         condition = "input.input_files && input.input_files.length > 1",
+         checkboxInput("combine_data", "Combine datasets")
+      ),
       uiOutput("tab_dependent_UI")
       
       # Model Estimation (ML, Bayes, OLS)
@@ -33,7 +36,7 @@ ui <- fluidPage(
       # tabs
       tabsetPanel(type = "tabs", id = "current_tab", 
         tabPanel("Plot", plotOutput("model_plot")),
-        tabPanel("Parameter Estimation", verbatimTextOutput("parameter_estimation")),
+        tabPanel("Parameter Estimation", plotOutput("loglikelihood_plot")),
         tabPanel("Model comparison", verbatimTextOutput("model_comparison")),
         
         tabPanel("Collect data", 

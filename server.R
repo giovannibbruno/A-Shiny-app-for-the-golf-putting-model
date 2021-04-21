@@ -16,16 +16,21 @@ nll <- function(sigma, ft, tries, hits)
               log = TRUE))
 
 
+
+
 server <- function(input, output) {
   
   # tab dependent UI
   ## renders a different user interface in each tab
   output$tab_dependent_UI <- renderUI({
     if(input$current_tab == "Plot"){
+
       return(NULL)
       
     }else if(input$current_tab == "Parameter Estimation"){
-      return(NULL)
+      sliderInput("range_sigma", "Range Sigma:",
+                  min = 0, max = 1, step = .01,
+                  value = c(0, 1))
       
     }else if(input$current_tab == "Model comparison"){
       return(NULL)
@@ -110,7 +115,38 @@ server <- function(input, output) {
     
     
   })
-  
+ 
+
+  # Parameter Estimation [tab: Parameter Estimation]
+
+
+  output$loglikelihood_plot <- renderPlot({
+
+    dat <- get_data()
+    sets <- unique(dat$ident) # ident names of datasets
+    n_sets <- length(sets)    # number of datasets
+    
+    sigmas <- seq(input$range_sigma[1], input$range_sigma[2], length.out = 5000)
+
+    lls <- sapply(sigmas, nll, ft = dat$ft, tries = dat$tries, hits = dat$hits)
+    print(summary(lls))
+
+    plot(lls ~ sigmas, type = "l", xlab = "Sigma", ylab = "negativ log-likelihood", axes = F)
+    axis(1)
+    box()
+
+    mle <- optim(par = 0.1, fn = nll,
+             ft = dat$ft, tries = dat$tries, hits = dat$hits,
+             method = "BFGS")
+
+    abline(v = mle$par)
+
+   
+    
+
+  })
+
+
   
   
   # Collect data [tab: Plot]
