@@ -16,7 +16,14 @@ ui <- fluidPage(
     sidebarPanel(
 
       # Choose Data
-      uiOutput("load_data"),
+      ## only show on plot and estimate tab
+      conditionalPanel(
+        condition = "input.current_tab == 'Plot' || 
+                     input.current_tab == 'Parameter Estimation' ||
+                     input.current_tab == 'Model comparison'",
+        uiOutput("load_data")
+      ),
+      ## show combine checkbox only if more than 1 dataset is selected 
       conditionalPanel(
          condition = "input.input_files && input.input_files.length > 1",
          checkboxInput("combine_data", "Combine datasets")
@@ -40,6 +47,9 @@ ui <- fluidPage(
         tabPanel("Model comparison", verbatimTextOutput("model_comparison")),
         
         tabPanel("Collect data", 
+
+        fluidRow(
+            column(5,
         
         # include p5js library and collect_data_golf.js
         # run in div 'divCollectData'
@@ -48,9 +58,12 @@ ui <- fluidPage(
               tags$head(tags$script(src = "p5.js")),
               tags$head(tags$script(src = "sketch.js")),
               tags$div(id = 'divCollectData', style = 'width:auto; height:auto')
-              ))
-        
-        
+              )
+          )),
+       column(7,
+        plotOutput("live_angle_distribution")      
+        )
+       )
         
         )
       )

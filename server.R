@@ -45,7 +45,8 @@ server <- function(input, output) {
 
     }else if(input$current_tab == "Collect data"){
       tagList(
-        textOutput("collected_data_summary"), 
+        checkboxInput("show_angle_distro", "Show angle distribution"),
+        strong("Scoring Board:"),
         verbatimTextOutput("show_collected_data"),
         actionButton("save_collected_data", "Save data"),
         actionButton("reset_collected_data", "Reset")
@@ -142,7 +143,7 @@ server <- function(input, output) {
         estim$par <- mle$par
   })
 
-  ## show estimated sigma if it's available
+  ## show estimated sigma if available
   output$estimated_sigma <- renderText({
     if(!is.na(estim$par)) 
       paste0("Minimum of the negative log-likelihood function is at sigma = ", 
@@ -174,25 +175,46 @@ server <- function(input, output) {
   
   
   # Collect data [tab: Plot]
-  collected <- reactiveValues(data = NULL)
+  collected <- reactiveValues(data = data.frame(ft = c(), angle = c(), hit = c()))
+
+  ## save collected data to .txt file
+  observeEvent(input$save_collected_data, {
+    write.table(collected$data, 
+                paste0("./collected_data/collected_",
+                        format(Sys.time(), "%d%m%Y_%H%M%S"), ".txt"), 
+                row.names = FALSE, quote = FALSE)
+    collected$data = data.frame(ft = c(), angle = c(), hit = c())
+  })
+
+  ## reset data
+  observeEvent(input$reset_collected_data, {
+    collected$data = data.frame(ft = c(), angle = c(), hit = c())
+  })
+
   
   ## add data from p5js application [work in progress... just a proof of
   ## concept 'till now]
-  # observeEvent(input$xMouse, {
-  #print(input$xMouse)
-  #print(str(input$xMouse))
-  
-  #collected$data <- rbind(collected$data, data.frame(ft = 1, angle = 1, hit = 1))
-  #})
-  
-  output$collected_data_summary <- renderPrint({
-    paste0("n = ", nrow(collected$data))
+  observeEvent(input$jsGolfData, { 
+    jsData <- input$jsGolfData
+    collected$data <- rbind(collected$data, data.frame(dist  = round(jsData[1], 0), 
+                                                       angle = jsData[2], 
+                                                       hit   = jsData[3]))
   })
   
+  ## show scoring board
   output$show_collected_data <- renderPrint({
-    head(collected$data, 50)
+    if(nrow(collected$data) > 0) tail(collected$data, 10)
   })
+
+  ## show angle distribution
+  output$live_angle_distribution <- renderPlot({
+    req(input$show_angle_distro)
+    if(input$show_angle_distro & nrow(collected$data) > 0) 
+      hist(collected$data$angle, xlab = "angle [radians]", 
+        main = "Distribution of the angle") 
   
+  
+  })
   
   
   
