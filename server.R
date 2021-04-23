@@ -29,15 +29,20 @@ server <- function(input, output) {
     if(input$current_tab == "Plot"){
 
       return(NULL)
-      
+
     }else if(input$current_tab == "Parameter Estimation"){
-      sliderInput("range_sigma", "Range Sigma:",
-                  min = 0, max = 1, step = .01,
-                  value = c(0, 1))
-      
+      tagList(
+        sliderInput("range_sigma", "Range Sigma:",
+          min = 0, max = 1, step = .01,
+          value = c(0, 1)),
+        actionButton("optim_nll", "Find minimum"),
+        textOutput("estimated_sigma") 
+      )
+
+
     }else if(input$current_tab == "Model comparison"){
       return(NULL)
-      
+
     }else if(input$current_tab == "Collect data"){
       tagList(
         textOutput("collected_data_summary"), 
@@ -46,9 +51,9 @@ server <- function(input, output) {
         actionButton("reset_collected_data", "Reset")
       )
     }
-    
-    
-    
+
+
+
   })
   
   # Choose data
@@ -121,31 +126,47 @@ server <- function(input, output) {
  
 
   # Parameter Estimation [tab: Parameter Estimation]
+  
+  estim <- reactiveValues(par = NA) # to store estimated sigma
 
+  ## estimate sigma if button optim_nll is pressed
+  observeEvent(input$optim_nll, {
+        dat <- get_data()
+        #defaultW <- getOption("warn")  # turn warnings of for optimization to
+        # make debugging easier
+        #options(warn=-1)
+        mle <- optim(par = 0.1, fn = nll,
+             ft = dat$ft, tries = dat$tries, hits = dat$hits,
+             method = "BFGS")
+        #options(warn = defaultW)
+        estim$par <- mle$par
+  })
 
+  ## show estimated sigma if it's available
+  output$estimated_sigma <- renderText({
+    if(!is.na(estim$par)) 
+      paste0("Minimum of the negative log-likelihood function is at sigma = ", 
+              round(estim$par, 4))
+  })
+
+  ## plot the negaitve log-likelihood
   output$loglikelihood_plot <- renderPlot({
-
+    req(input$range_sigma)
     dat <- get_data()
     sets <- unique(dat$ident) # ident names of datasets
     n_sets <- length(sets)    # number of datasets
     
-    sigmas <- seq(input$range_sigma[1], input$range_sigma[2], length.out = 5000)
-
+    sigmas <- seq(input$range_sigma[1], input$range_sigma[2], length.out = 500)
     lls <- sapply(sigmas, nll, ft = dat$ft, tries = dat$tries, hits = dat$hits)
-    print(summary(lls))
-
-    plot(lls ~ sigmas, type = "l", xlab = "Sigma", ylab = "negativ log-likelihood", axes = F)
+    
+    plot(lls ~ sigmas, type = "l", xlab = "Sigma", 
+         ylab = "negativ log-likelihood", axes = F)
     axis(1)
+  
+    if(!is.na(estim$par)) abline(v = estim$par) # plot estimated sigma if available
+
     box()
 
-    mle <- optim(par = 0.1, fn = nll,
-             ft = dat$ft, tries = dat$tries, hits = dat$hits,
-             method = "BFGS")
-
-    abline(v = mle$par)
-
-   
-    
 
   })
 
