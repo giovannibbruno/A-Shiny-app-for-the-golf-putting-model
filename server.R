@@ -7,7 +7,10 @@ library(ggplot2)
 ggm <- function(ft, sigma){
   r <- 1.68/2 * 1/12                     # radius of ball (inch -> feet)
   R <- 4.25/2 * 1/12                     # radius of hole
-  2*pnorm(asin((R - r)/ft) / sigma) - 1  # prob of hit
+  #2*pnorm(asin((R - r)/ft) / sigma) - 1  # prob of hit
+  hit <- 2*pnorm(asin((R - r)/ft) / sigma) - 1 # prob of hit
+  hit - .Machine$double.eps                    # subtract a tiny bit
+
 }
 
 ## negative log-likelihood --> minimum = MLE
