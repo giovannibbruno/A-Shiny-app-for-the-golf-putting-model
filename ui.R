@@ -4,8 +4,6 @@
 
 ui <- fluidPage(
 
-
-
   # title
   titlePanel("Golf putting model"),
 
