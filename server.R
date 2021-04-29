@@ -1,7 +1,6 @@
 # server function for golf model app -- QHELP 2021
 library(ggplot2)
 
-
 # some useful functions 
 ## Gelman golf model -> probability of hit depending on ft from hole (distance) and
 ## sigma (standard deviation of angle distribution [N(0, sigma^2)])
