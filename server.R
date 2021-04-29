@@ -41,7 +41,10 @@ server <- function(input, output) {
 
 
     }else if(input$current_tab == "Model comparison"){
-      return(NULL)
+      tagList(
+        checkboxInput("information", "Show more information?", value = FALSE),
+        textOutput("infos") 
+      )
 
     }else if(input$current_tab == "Collect data"){
       tagList(
@@ -170,7 +173,115 @@ server <- function(input, output) {
 
 
   })
-
+  
+  
+  
+  # Model comparison [tab: Model Comparison]
+  
+  # generic for multiple datasets / combined
+  
+  
+  # Plot with logistic regression and probability model
+  output$comparison_plot <- renderPlot({
+    
+    dat <- get_data()
+    sets <- unique(dat$ident) # ident names of datasets
+    n_sets <- length(sets)    # number of datasets
+    
+    # flexible for different distances
+    plot(hits/tries ~ ft, dat, ylim=0:1, xlim=c(0, max(dat$ft + 1)), pch=16,
+         panel.first=quote(grid(lty=1)), ylab="Probability of success",
+         xlab="Distance from hole (feet)")
+    
+    # with CIs
+    ci <- mapply(binom.test, dat$hits, dat$tries)["conf.int", ]
+    arrows(dat$ft, sapply(ci, "[[", 1), dat$ft, sapply(ci, "[[", 2), .05, 90, 3)
+    
+    
+    # model estimations and predictions
+    for(i in 1:n_sets){
+      dat.loc <- dat[dat$ident == sets[i],]
+      
+      mle <- optim(par = 0.1, fn = nll,
+                   ft = dat.loc$ft, tries = dat.loc$tries, hits = dat.loc$hits,
+                   method = "BFGS")
+      
+      xval <- seq(0.2, max(dat$ft) + 1, length.out=101)
+      lines(ggm(xval, sigma = mle$par) ~ xval, dat, col = "blue")
+      lines(predict(glm(cbind(hits, tries - hits) ~ ft, binomial, dat.loc),
+                    data.frame(ft = xval), type = "response") ~ xval, lty = 2, col = "firebrick")
+    }
+    
+    legend("topright", col = c("blue", "firebrick"), 
+           legend = c("Golf Model", "Logistic Regression"), lty = 1:2)
+    
+    box()
+    
+  })
+  
+  
+  ## some more information like G2, AIC and BIC per model and dataset
+  output$stats <- renderPrint({
+    
+    # default is FALSE
+    if(input$information == TRUE){
+      
+      dat <- get_data()
+      sets <- unique(dat$ident) # ident names of datasets
+      n_sets <- length(sets)    # number of datasets
+      
+      # set up dataframe/table to fill
+      out.table <- data.frame(Set = factor(rep(sets, each = 2)), 
+                              Model = factor(rep(c("Golf model", "Logistic"), times = n_sets)),
+                              df = rep(0, 2*n_sets), G2 = rep(0, 2*n_sets), 
+                              AIC = rep(0, 2*n_sets), BIC = rep(0, 2*n_sets)
+      )
+      
+      # goodness of fit for both models in all choosen datasets
+      for(i in 1:n_sets){
+        dat.loc <- dat[dat$ident == sets[i],]
+        
+        mle <- optim(par = 0.1, fn = nll,
+                     ft = dat.loc$ft, tries = dat.loc$tries, hits = dat.loc$hits,
+                     method = "BFGS")
+        
+        n <- length(dat.loc$ft)
+        
+        G2.Geom <- 2*(with(dat.loc, sum(dbinom(hits, tries, hits/tries, log = TRUE))) + mle$value)
+        df.Geom <- length(unique(dat.loc$ft)) - 1
+        k.Geom <- 1
+        AIC.Geom <- -2*-mle$value + 2*k.Geom
+        BIC.Geom <- -2*-mle$value + k.Geom*log(n)
+        
+        glm1 <- glm(cbind(hits, tries - hits) ~ ft, binomial, dat.loc)
+        G2.Log <- sum(resid(glm1, type = "deviance")^2)
+        df.Log <- length(unique(dat.loc$ft)) - 2
+        AIC.Log <- AIC(glm1)
+        BIC.Log <- BIC(glm1)
+        
+        out.table[2*i-1,3:6] <- c(df.Geom, round(G2.Geom,2), round(AIC.Geom,2), round(BIC.Geom,2))
+        out.table[2*i, 3:6] <- c(df.Log, round(G2.Log,2), round(AIC.Log,2), round(BIC.Log,2))
+      }
+      print(out.table)
+      
+      ### Are these outputs correct?
+      
+    }
+  })
+  
+  # some general information based on the goodness of fit
+  output$infos <- renderText({
+    
+    # default = FALSE
+    if(input$information == TRUE){
+      paste("The Golf model fits much better, while it is also more parsimonious. 
+            Therefore, it seems pretty reasonable. 
+            Nevertheless, it is not perfect and ignores, for example, 
+            whether a shot might be too short or too long. 
+            Moreover, it does not take into account the variations between golf greens, 
+            playing conditions and personal abilities.")
+    }
+  })
 
   
   
