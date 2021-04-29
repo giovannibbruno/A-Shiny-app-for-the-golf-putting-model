@@ -44,7 +44,8 @@ ui <- fluidPage(
       tabsetPanel(type = "tabs", id = "current_tab", 
         tabPanel("Plot", plotOutput("model_plot")),
         tabPanel("Parameter Estimation", plotOutput("loglikelihood_plot")),
-        tabPanel("Model comparison", verbatimTextOutput("model_comparison")),
+        tabPanel("Model comparison", plotOutput("comparison_plot"), 
+                 verbatimTextOutput("stats")),
         
         tabPanel("Collect data", 
 
