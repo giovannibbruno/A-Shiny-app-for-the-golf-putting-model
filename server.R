@@ -355,7 +355,7 @@ server <- function(input, output) {
                 xval <- seq(0.2, 21, length.out=101)
                 lines(ggm(xval, sigma = mle$par) ~ xval, simulated_data, col = "blue")
                 
-                txt <- paste("Parameter reestimation:", round(mle$par,4))
+                txt <- paste("Sigma reestimation:", round(mle$par,4))
                 text(12.5, 0.7, txt, cex = 1.3)
    })
   
