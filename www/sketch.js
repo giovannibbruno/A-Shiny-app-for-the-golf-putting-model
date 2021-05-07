@@ -1,4 +1,4 @@
-let deltaAngle = 0.03;
+let deltaAngle = 0.04;
 let initial_speed = 10;
 
 let grasResistance = 0.1;

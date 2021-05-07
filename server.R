@@ -46,13 +46,26 @@ server <- function(input, output) {
         textOutput("infos") 
       )
 
-    }else if(input$current_tab == "Collect data"){
+    }else if(input$current_tab == "Let's play a game!"){
       tagList(
-        checkboxInput("show_angle_distro", "Show angle distribution"),
+        h4("Want to play a game?"),
+        p("Just press the 'Set direction' button and see what happens. 
+          If you want to save your data, click 'Save data' otherwise use 
+          'Reset' to reset the board."),
+        p("Under 'Choose data' you can retrieve already saved data sets. 
+          You can find your own data set by date and time. Here it is worth 
+          to have a look at the distribution of the angles and the hit rate
+          depending on the distance: Do the assumptions of the golf putting
+          model fit to this data and how well does the model describe your 
+          collected data?"),
         strong("Scoring Board:"),
         verbatimTextOutput("show_collected_data"),
         actionButton("save_collected_data", "Save data"),
-        actionButton("reset_collected_data", "Reset")
+        actionButton("reset_collected_data", "Reset"),
+        br(),
+        br(),
+        uiOutput("load_collected_data"),
+        checkboxInput("show_angle_distro", "Show distribution of the angle")
       )
     }
 
@@ -285,8 +298,35 @@ server <- function(input, output) {
 
   
   
-  # Collect data [tab: Plot]
+  # Collect data [tab: "Let's play a game!"]
+
+  # load collected data
+  output$load_collected_data <- renderUI({
+    files <- list.files("./collected_data", pattern = ".txt")
+    tagList(
+    selectInput("input_collected_files", "Choose data", files, multiple = TRUE),
+
+   conditionalPanel(
+         condition = "input.input_collected_files && input.input_collected_files.length > 1",
+          p("If you select more than one dataset, they will be combined into one."),
+          br()
+      )
+   )
+  })
+    
+  get_saved_data <- reactive({
+    if(isTruthy(input$input_collected_files)) {
+      temp <- do.call(rbind.data.frame, lapply(paste0("./collected_data/", 
+            input$input_collected_files), read.table, header = T))
+      temp
+    } else {
+      data.frame()
+    }
+  })
+
+
   collected <- reactiveValues(data = data.frame(ft = c(), angle = c(), hit = c()))
+
 
   ## save collected data to .txt file
   observeEvent(input$save_collected_data, {
@@ -320,13 +360,35 @@ server <- function(input, output) {
   ## show angle distribution
   output$live_angle_distribution <- renderPlot({
     req(input$show_angle_distro)
-    if(input$show_angle_distro & nrow(collected$data) > 0) 
-      hist(collected$data$angle, xlab = "angle [radians]", 
+    if(input$show_angle_distro & nrow(collected$data) > 0){ 
+      saved_data <- get_saved_data()
+      all_data <- rbind(collected$data, saved_data)
+      hist(all_data$angle, xlab = "angle [radians]", 
         main = "Distribution of the angle") 
   
-  
+    }
   })
   
+  ## hitrate depending on distance
+  output$live_hitrate_distance <- renderPlot({
+    req(input$show_angle_distro)
+    if(input$show_angle_distro & nrow(collected$data) > 0){ 
+      saved_data <- get_saved_data()
+      all_data <- rbind(collected$data, saved_data)
+
+      all_data$dist_cut <- cut(all_data$dist, 15)
+      ag <- aggregate(hit ~ dist_cut, all_data, mean)
+
+      plot(hit ~ as.numeric(dist_cut), ag, ylim=0:1, pch=16,
+         panel.first=quote(grid(lty=1)), ylab="Probability of success",
+         xlab="Distance from hole (pixel)", axes = F)
+      axis(2)
+      axis(1, at = 1:15, labels = levels(ag$dist_cut))
+
+  
+    }
+  })
+
   
   
   

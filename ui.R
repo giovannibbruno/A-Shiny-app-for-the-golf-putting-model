@@ -25,7 +25,7 @@ ui <- fluidPage(
       ),
       ## show combine checkbox only if more than 1 dataset is selected 
       conditionalPanel(
-         condition = "input.input_files && input.input_files.length > 1",
+         condition = "input.input_files && input.input_files.length < -1",
          checkboxInput("combine_data", "Combine datasets")
       ),
       uiOutput("tab_dependent_UI")
@@ -47,7 +47,7 @@ ui <- fluidPage(
         tabPanel("Model comparison", plotOutput("comparison_plot"), 
                  verbatimTextOutput("stats")),
         
-        tabPanel("Collect data", 
+        tabPanel("Let's play a game!", 
 
         fluidRow(
             column(5,
@@ -62,7 +62,8 @@ ui <- fluidPage(
               )
           )),
        column(7,
-        plotOutput("live_angle_distribution")      
+        plotOutput("live_angle_distribution"),
+        plotOutput("live_hitrate_distance")       
         )
        )
         
