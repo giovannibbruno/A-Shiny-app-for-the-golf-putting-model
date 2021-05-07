@@ -46,25 +46,25 @@ ui <- fluidPage(
         tabPanel("Parameter Estimation", plotOutput("loglikelihood_plot")),
         tabPanel("Model comparison", plotOutput("comparison_plot"), 
                  verbatimTextOutput("stats")),
+        tabPanel("Data simulation", plotOutput(outputId = "plot_simulated")),
         
         tabPanel("Let's play a game!", 
-
-        fluidRow(
+          fluidRow(
             column(5,
-        
-        # include p5js library and collect_data_golf.js
-        # run in div 'divCollectData'
-          tags$html(
-            tags$body(
-              tags$head(tags$script(src = "p5.js")),
-              tags$head(tags$script(src = "sketch.js")),
-              tags$div(id = 'divCollectData', style = 'width:auto; height:auto')
-              )
-          )),
-       column(7,
-        plotOutput("live_angle_distribution"),
-        plotOutput("live_hitrate_distance")       
-        )
+
+              # include p5js library and collect_data_golf.js
+              # run in div 'divCollectData'
+              tags$html(
+                tags$body(
+                  tags$head(tags$script(src = "p5.js")),
+                  tags$head(tags$script(src = "sketch.js")),
+                  tags$div(id = 'divCollectData', style = 'width:auto; height:auto')
+                )
+                )),
+            column(7,
+              plotOutput("live_angle_distribution"),
+              plotOutput("live_hitrate_distance")       
+            )
        )
         
         )

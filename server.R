@@ -19,6 +19,23 @@ nll <- function(sigma, ft, tries, hits)
               log = TRUE))
 
 
+## functions to simualate data
+# Simulation of Binomial Data based sigma
+
+# a data frame wich shows all the tries, successes and the resulting probability 
+# per distance
+distance <- c(seq(2,20,1))
+
+simulated_data <- data.frame(distance, tries = 1000, successes = NA, 
+                             probability = NA, row.names = NULL)
+
+# function for data simulation with probability and tries as variables
+data_sampler <- function(x){
+  generated <- rbinom(n = 1000, size = 1, prob = x)
+  success <- sum(generated)
+  return (success)
+}
+
 
 
 server <- function(input, output) {
@@ -44,6 +61,16 @@ server <- function(input, output) {
       tagList(
         checkboxInput("information", "Show more information?", value = FALSE),
         textOutput("infos") 
+      )
+
+    }else if(input$current_tab == "Data simulation"){
+      tagList(
+        # *Input() functions
+        sliderInput(inputId = "sigma1", label = "Choose a sigma", value = 0.026,
+          min = 0.005, max = 0.35),
+        # *Output() functions
+        tableOutput(outputId = "table_simulated")
+
       )
 
     }else if(input$current_tab == "Let's play a game!"){
@@ -106,6 +133,7 @@ server <- function(input, output) {
       temp
   })
   
+  #################################
   # plot [tab: Plot]
   output$model_plot <- renderPlot({
     dat <- get_data()
@@ -141,7 +169,7 @@ server <- function(input, output) {
     
   })
  
-
+  #################################
   # Parameter Estimation [tab: Parameter Estimation]
   
   estim <- reactiveValues(par = NA) # to store estimated sigma
@@ -187,8 +215,7 @@ server <- function(input, output) {
 
   })
   
-  
-  
+  #################################
   # Model comparison [tab: Model Comparison]
   
   # generic for multiple datasets / combined
@@ -296,8 +323,30 @@ server <- function(input, output) {
     }
   })
 
+
+
+  #################################
+  # simulate data [tab: "Data simulation"]
+  # output table based on sigma slider
+  output$table_simulated <- renderTable({
+    simulated_data$probability <- sapply(simulated_data$distance, 
+                                         FUN = ggm, sigma = input$sigma1)
+    simulated_data$successes <- sapply(simulated_data$probability, FUN = data_sampler)
+    return(simulated_data)
+  })
   
+  # output plot based on sigma slider
+  output$plot_simulated <- renderPlot({
+                simulated_data$probability <- sapply(simulated_data$distance, 
+                                                      FUN = ggm, sigma = input$sigma1)
+                simulated_data$successes <- sapply(simulated_data$probability, 
+                                                   FUN = data_sampler)
+                plot(simulated_data$successes)
+    plot(simulated_data$successes)
+   })
+
   
+  #################################  
   # Collect data [tab: "Let's play a game!"]
 
   # load collected data
