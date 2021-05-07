@@ -70,7 +70,6 @@ server <- function(input, output) {
           min = 0.005, max = 0.35),
         # *Output() functions
         tableOutput(outputId = "table_simulated")
-
       )
 
     }else if(input$current_tab == "Let's play a game!"){
@@ -246,8 +245,8 @@ server <- function(input, output) {
                    ft = dat.loc$ft, tries = dat.loc$tries, hits = dat.loc$hits,
                    method = "BFGS")
       
-      xval <- seq(0.2, max(dat$ft) + 1, length.out=101)
-      lines(ggm(xval, sigma = mle$par) ~ xval, dat, col = "blue")
+      xval <- seq(0.2, max(dat$ft) + 1, length.out=1001)
+      lines(ggm(xval, sigma = mle$par) ~ xval, dat.loc, col = "blue")
       lines(predict(glm(cbind(hits, tries - hits) ~ ft, binomial, dat.loc),
                     data.frame(ft = xval), type = "response") ~ xval, lty = 2, col = "firebrick")
     }
@@ -314,8 +313,7 @@ server <- function(input, output) {
     
     # default = FALSE
     if(input$information == TRUE){
-      paste("The Golf model fits much better, while it is also more parsimonious. 
-            Therefore, it seems pretty reasonable. 
+      paste("The Golf model fits much better, while it is also more parsimonious.
             Nevertheless, it is not perfect and ignores, for example, 
             whether a shot might be too short or too long. 
             Moreover, it does not take into account the variations between golf greens, 
@@ -341,10 +339,26 @@ server <- function(input, output) {
                                                       FUN = ggm, sigma = input$sigma1)
                 simulated_data$successes <- sapply(simulated_data$probability, 
                                                    FUN = data_sampler)
-                plot(simulated_data$successes)
-    plot(simulated_data$successes)
+                
+                plot(successes/tries ~ distance, simulated_data, ylim=0:1, xlim=c(0, 21), pch=16,
+                     panel.first=quote(grid(lty=1)), ylab="Probability of success",
+                     xlab="Distance from hole (feet)")
+                
+                
+                # also show the estimated golf_model
+                mle <- optim(par = 0.1, fn = nll,
+                             ft = simulated_data$distance, 
+                             tries = simulated_data$tries, 
+                             hits = simulated_data$successes,
+                             method = "BFGS")
+                
+                xval <- seq(0.2, 21, length.out=101)
+                lines(ggm(xval, sigma = mle$par) ~ xval, simulated_data, col = "blue")
+                
+                txt <- paste("Parameter reestimation:", round(mle$par,4))
+                text(12.5, 0.7, txt, cex = 1.3)
    })
-
+  
   
   #################################  
   # Collect data [tab: "Let's play a game!"]
