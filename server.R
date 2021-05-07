@@ -298,6 +298,22 @@ server <- function(input, output) {
         AIC.Log <- AIC(glm1)
         BIC.Log <- BIC(glm1)
         
+        # A check for the likelihoods:
+        #
+        # nll2 <- function(beta, ft, tries, hits)
+        #   -sum(dbinom(x = hits, size = tries,
+        #               prob = plogis(beta[1] + beta[2]*ft),
+        #               log = TRUE))
+        # 
+        # mle2 <- optim(par = c(2, -0.2), fn = nll2,
+        #               ft = dat.loc$ft, tries = dat.loc$tries, hits = dat.loc$hits,
+        #               method = "BFGS")
+        # 
+        # ## Compare with glm()
+        # logLik(glm(cbind(hits, tries - hits) ~ ft, binomial, dat.loc))
+        # 
+        # -> Looks as if they are on the same scale.
+        
         out.table[2*i-1,3:6] <- c(df.Geom, round(G2.Geom,2), round(AIC.Geom,2), round(BIC.Geom,2))
         out.table[2*i, 3:6] <- c(df.Log, round(G2.Log,2), round(AIC.Log,2), round(BIC.Log,2))
       }
