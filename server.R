@@ -142,14 +142,14 @@ server <- function(input, output) {
     # could be useful for the plot
     
     # relative frequency (hits/tries) depending on distance from hole in ft
-    if (n_sets <= 1) {
+   if (n_sets <= 1) {
       ggplot(dat[dat$ident == sets[1], ], aes(x = ft, y = hits/tries, col = ident)) + 
         geom_point() +
         geom_line(size=0.7) +
         ylim(0,1) +
         xlim(0, max(dat$ft)) +
-        ylab("hit probability (hits/tries)") +
-        xlab("distance from the hole (ft)") +
+        ylab("Probability of success") +
+        xlab("Distance from hole (feet)") +
         theme_light() +
         theme(legend.position = "none")
     } else {
@@ -158,8 +158,8 @@ server <- function(input, output) {
         geom_line(size=0.7) +
         ylim(0,1) +
         xlim(0, max(dat$ft)) +
-        ylab("hit probability (hits/tries)") +
-        xlab("distance from the hole (ft)") +
+        ylab("Probability of success") +
+        xlab("Distance from hole (feet)") +
         theme_light() +
         labs(col = "Dataset")
     }
@@ -204,13 +204,12 @@ server <- function(input, output) {
     lls <- sapply(sigmas, nll, ft = dat$ft, tries = dat$tries, hits = dat$hits)
     
     plot(lls ~ sigmas, type = "l", xlab = "Sigma", 
-         ylab = "negativ log-likelihood", axes = F)
+         ylab = "negative log-likelihood", axes = F, col="cornflowerblue", lwd= 2.5)
     axis(1)
-  
-    if(!is.na(estim$par)) abline(v = estim$par) # plot estimated sigma if available
-
+    
+    if(!is.na(estim$par)) abline(v = estim$par, col="red", lty=2) # plot estimated sigma if available
+    
     box()
-
 
   })
   
