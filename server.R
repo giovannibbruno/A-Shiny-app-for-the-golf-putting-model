@@ -45,7 +45,20 @@ server <- function(input, output) {
   output$tab_dependent_UI <- renderUI({
     if(input$current_tab == "Plot"){
 
-      return(NULL)
+      tagList(
+        br(),
+        br(),
+        br(),
+        hr(),
+        h4("References"),
+        tags$a(href="http://www.stat.columbia.edu/~gelman/research/published/golf.pdf", 
+               "Gelman, A., & Nolan, D. (2002). A probability model for golf putting. Teaching Statistics, 24(3), 93-95."),
+        br(),
+        br(),
+        tags$a(href="https://statmodeling.stat.columbia.edu/2019/03/21/new-golf-putting-data-and-a-new-golf-putting-model/", 
+               "Blogpost by A. Gelman")
+
+      )
 
     }else if(input$current_tab == "Parameter Estimation"){
       tagList(
@@ -91,8 +104,19 @@ server <- function(input, output) {
         br(),
         br(),
         uiOutput("load_collected_data"),
-        checkboxInput("show_angle_distro", "Show distribution of the angle")
-      )
+        checkboxInput("show_angle_distro", "Show distribution of the angle"),
+
+
+        br(),
+        br(),
+        br(),
+        hr(),
+        h4("References"),
+        tags$a(href=" https://p5js.org/", 
+               "p5js.org")
+
+
+       )
     }
 
 
