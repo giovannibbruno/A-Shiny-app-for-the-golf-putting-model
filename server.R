@@ -50,13 +50,21 @@ server <- function(input, output) {
         br(),
         br(),
         hr(),
+        h4("Background"),
+        textOutput("background"),
+        br(),
+        br(),
         h4("References"),
         tags$a(href="http://www.stat.columbia.edu/~gelman/research/published/golf.pdf", 
                "Gelman, A., & Nolan, D. (2002). A probability model for golf putting. Teaching Statistics, 24(3), 93-95."),
         br(),
         br(),
         tags$a(href="https://statmodeling.stat.columbia.edu/2019/03/21/new-golf-putting-data-and-a-new-golf-putting-model/", 
-               "Blogpost by A. Gelman")
+               "Blogpost by A. Gelman"),
+        br(),
+        br(),
+        tags$a(href="https://mc-stan.org/users/documentation/case-studies/golf.html",
+               "Another Blogpost by A. Gelman")
 
       )
 
@@ -360,6 +368,15 @@ server <- function(input, output) {
     }
   })
 
+  
+  # background info about the whole Project
+  output$background <- renderText({
+"In a Paper of Gelman and Nolan (2002) they look at the real successrates of golfers putting from different distances, ranging from 2 feet to 20 feet. You can see the data in the graph on this page. The Authors asked themselves what sort of probability model could fit the given data. The natural starting point would be logistic regression. Then they developed a custom probability model, built from first principles and then fitted that tot he data. 
+This custom model is based on the geometric rules which apply to golfing. If you are putting, there is a golf ball lying at a certain distance from the hole, which is a little bigger than the golf ball itself. So in order to succeed, you dont need to hit the ball perfect, you have a little scope to the left and to the right. That scope is measured in form of degree deviating from the perfect line between the golfball and the hole. With this information you can then build a custom probability model, based only on geometry. 
+The model assumes that the golfer is attempting to hit the ball completely straight but that many factors may interfere with this goal, so that the actual angle follows a normal distribution centered at 0 with some standard deviation sigma.  
+The probability that the ball goes in the hole is then the probability that the angle is less than the threshold. The only unknown parameter in this model is sigma, the standard deviation of the distribution of shot angles.
+On this interactive Page you can find different panels, all introducing some aspects of the whole process of model fitting, comparing it to the logistic regression, data simulation based on that model, and also a little game, where you can create your own golf-putting data. Have fun experiencing around!"
+  })
 
 
   #################################
